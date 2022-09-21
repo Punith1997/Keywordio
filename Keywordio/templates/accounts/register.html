@@ -1,0 +1,95 @@
+
+{% extends 'base.html' %}
+{% block content %}
+{% include 'includes/navbar.html'%}
+<div class="p-5">
+  <div class="container">
+    <h2 class="text-center pb-5">Register here!</h2>
+    <form class="row g-3" method="post" action="{% url 'register_view' %}">
+      {% csrf_token %}
+      <div class="col-md-6">
+        <label class="form-label">First Name</label>
+        {% if error_dict.first_name  %}
+        <input style="color:red; border-color:red;" type="text" class="form-control", name = 'first_name' value={{value_dict.first_name}} required>
+        <small style="color:red;">{{error_dict.first_name}}</small>
+        {% else %}
+        {% if post %}
+        <input type="text" class="form-control", name = 'first_name' value={{value_dict.first_name}} required>
+        {% else %}
+        <input type="text" class="form-control" name = 'first_name' value="" required>
+        {% endif %}
+        {% endif %}
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Last Name</label>
+        {% if error_dict.last_name  %}
+        <input style="color:red; border-color:red;" type="text" class="form-control", name = 'last_name' value={{value_dict.last_name}} required>
+        <small style="color:red;">{{error_dict.last_name}}</small>
+        {% else %}
+        {% if post %}
+        <input type="text" class="form-control", name = 'last_name' value={{value_dict.last_name}} required>
+        {% else %}
+        <input type="text" class="form-control", name = 'last_name' value="" required>
+        {% endif %}
+        {% endif %}
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Username</label>
+        {% if error_dict.username  %}
+        <input style="color:red; border-color:red;" type="text" class="form-control", name = 'username' value={{value_dict.username}} required>
+        <small style="color:red;">{{error_dict.username}}</small>
+        {% else %}
+        {% if post %}
+        <input type="text" class="form-control", name = 'username' value={{value_dict.username}} required>
+        {% else %}
+        <input type="text" class="form-control", name = 'username' value="" required>
+        {% endif %}
+        {% endif %}
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Email</label>
+        {% if error_dict.email  %}
+        <input style="color:red; border-color:red;" type="text" class="form-control", name = 'email' value={{value_dict.email}} required>
+        <small style="color:red;">{{error_dict.email}}</small>
+        {% else %}
+        {% if post %}
+        <input type="text" class="form-control", name = 'email' value={{value_dict.email}} required>
+        {% else %}
+        <input type="email" class="form-control", name = 'email' value="" required>
+        {% endif %}
+        {% endif %}
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-control", name = 'password' required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Confirm Password</label>
+        <input type="password" class="form-control", name = 'confirm_password' required>
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary">Send verification link</button>
+      </div>
+    </form>
+
+    {% if form.errors %}
+    <span style="color:red ;">{{form.non_field_errors}}</span>
+    {% endif %}
+
+    <div class="row">
+      <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+          {% include 'includes/alerts.html' %}
+    </div>
+  </div>
+
+
+
+</div>
+</div>
+
+
+{% endblock %}

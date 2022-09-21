@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% include 'includes/navbar.html' %}
+{% if user.is_authenticated %}
+<div class="row">
+  <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+      {% include 'includes/alerts.html' %}
+</div>
+</div>
+<h3>Hii {{user.username}}, please manage your library here!</h3>
+<div style="margin-left:10%; margin-right:10%;">
+  <table class="table table-hover" >
+    <tbody id = 'add_book_field'>
+      <th>Name</th>
+      <th>Autor</th>
+      <th>Published Year</th>
+      <th>Edit/Delete</th>
+      {% for book in books_list %}
+      <tr id = book_row_comp{{book.id}}>
+        <td class = {{book.id}}book_row>{{book.book_name}}</td>
+        <td class = {{book.id}}book_row>{{book.author_name}}</td>
+        <td class = {{book.id}}book_row>{{book.published_year}}</td>
+        <td class = {{book.id}}book_row><a href="#" data-url = "{% url 'edit_book_view' book.id %}" book-id = {{book.id}} onclick=editing_field(this)>Edit</a>&nbsp/&nbsp<a href="#" data-url = "{% url 'delete_book_view' book.id %}" book-id = {{book.id}} onclick = deleting_field(this)>Delete</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div id="pre_add_div">
+    <button type="button" id="add_button" name="button" onclick=adding_field()>Add</button>
+  </div>
+
+  <div id="submit_button">
+
+  </div>
+
+  {% else %}
+  {% if books_list %}
+  <h3>Hii students, below are the list of books provided by your admins!</h3>
+  <table class="table table-hover">
+    <th>Name</th>
+    <th>Autor</th>
+    <th>Published Year</th>
+    <th>Admin</th>
+    {% for book in books_list %}
+    <tr>
+      <td>{{book.book_name}}</td>
+      <td>{{book.author_name}}</td>
+      <td>{{book.published_year}}</td>
+      <td>{{book.book_user.username}}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+    <h3 class = 'text-center' style="margin-top:10%;">Hii students, please wait for your admins to upload books list.</h3>
+  {% endif %}
+  {% endif %}
+</div>
+
+<script type="text/javascript">
+
+  function adding_field() {
+    var add_field = document.getElementById('add_book_field')
+    var btn = document.createElement('button')
+    btn.setAttribute('name','adding_books')
+    btn.setAttribute('id','submit_book')
+    btn.setAttribute('data-url',"{% url 'add_book_view' %}")
+    btn.setAttribute('onclick', 'submit_add_book()')
+    btn.innerHTML = 'Submit'
+    var submitting_button = document.getElementById('submit_button')
+    var adding_button = document.getElementById('add_button')
+    adding_button.remove()
+    submitting_button.appendChild(btn)
+    var tr = document.createElement('tr');
+    tr.setAttribute('id', 'row_book_add');
+    // var fr = document.createElement('form')
+    // fr.setAttribute('method',"post");
+    // fr.setAttribute('action',"index.html")
+    // console.log(fr)
+    for (var i = 0; i < 3; i++) {
+      var td = document.createElement('td');
+      td.innerHTML = '<input type="text" name=' + 'col' + i + ' value="">'
+      tr.appendChild(td)
+  }
+  var td = document.createElement('td');
+  td.innerHTML = "<button type='button' name='cancel_adding' onclick='cancel_adding_fun()'>Cancel</button>"
+  tr.appendChild(td)
+  add_field.appendChild(tr)
+  // fr.appendChild(tr)
+  // console.log(add_field.innerHTML)
+  // var s = tr.innerHTML;
+  // console.log(s)
+  // console.log(add_field)
+  }
+
+function cancel_adding_fun() {
+  var pre_add_div_elem = document.getElementById('pre_add_div')
+  var canl_add_elem = document.getElementById('row_book_add')
+  canl_add_elem.remove()
+  var submit_book_elem = document.getElementById('submit_book')
+  submit_book_elem.remove()
+  var btn_sc = document.createElement('button')
+  btn_sc.setAttribute('type', 'button')
+  btn_sc.setAttribute('id', 'add_button')
+  btn_sc.setAttribute('name', 'button')
+  btn_sc.setAttribute('onclick', 'adding_field()')
+  btn_sc.innerHTML = "Add"
+  pre_add_div_elem.appendChild(btn_sc)
+}
+
+  function submit_add_book(){
+    var pre_add_div_elem = document.getElementById('pre_add_div')
+    var row_book_add_elem = document.getElementById('row_book_add')
+    var url = document.getElementById('submit_book').getAttribute('data-url')
+    var submit_book_elem = document.getElementById('submit_book')
+    var cancel_adding_elem = document.getElementsByName('cancel_adding')[0]
+    var book_name = document.getElementsByName('col0')[0].value
+    var author_name = document.getElementsByName('col1')[0].value
+    var published_year = document.getElementsByName('col2')[0].value
+    // console.log(book_name, author_name, published_year)
+    $.ajax({
+            type: 'GET',
+            url: url,
+            data: {
+              "book_name": book_name,
+              "author_name": author_name,
+              "published_year":published_year,
+            },
+            success: function(response){
+                if (response.status == 'Success'){
+                  // console.log(response.message);
+                  swal(response.message, '', 'success')
+                  submit_book_elem.remove();
+                  cancel_adding_elem.remove();
+                  row_book_add_elem.remove();
+                  var add_field = document.getElementById('add_book_field')
+                  // add_field.classList.add("table", "table-hover")
+                  var tr = document.createElement('tr')
+                  var crt_tr_cls = "book_row_comp"+ response.bookid
+                  var edt_url = "/books/edit_book/"+response.bookid+"/"
+                  var dlt_url = "/books/delete_book/"+response.bookid+"/"
+                  tr.setAttribute('id', crt_tr_cls)
+                  add_field.appendChild(tr)
+                  // console.log(add_field)
+                  var td1 = document.createElement('td')
+                  var td2 = document.createElement('td')
+                  var td3 = document.createElement('td')
+                  var td4 = document.createElement('td')
+                  var crt_td_cls = response.bookid+"book_row"
+                  td1.setAttribute('class', crt_td_cls)
+                  td2.setAttribute('class', crt_td_cls)
+                  td3.setAttribute('class', crt_td_cls)
+                  td4.setAttribute('class', crt_td_cls)
+                  td1.innerHTML = book_name
+                  tr.appendChild(td1)
+                  td2.innerHTML = author_name
+                  tr.appendChild(td2)
+                  td3.innerHTML = published_year
+                  tr.appendChild(td3)
+                  td4.innerHTML = "<a href='#' onclick = 'editing_field(this)' data-url="+ edt_url + " " +"book-id="+ response.bookid +">Edit</a>&nbsp/&nbsp<a href='#' onclick = 'deleting_field(this)' data-url="+ dlt_url + " " +"book-id="+ response.bookid +">Delete</a>"
+                  tr.appendChild(td4)
+
+                  // console.log(add_field)
+
+                  var btn_sc = document.createElement('button')
+                  btn_sc.setAttribute('type', 'button')
+                  btn_sc.setAttribute('id', 'add_button')
+                  btn_sc.setAttribute('name', 'button')
+                  btn_sc.setAttribute('onclick', 'adding_field()')
+                  btn_sc.innerHTML = "Add"
+                  pre_add_div_elem.appendChild(btn_sc)
+
+                  // <button type="button" id="add_button" name="button" onclick=adding_field()>Add</button>
+                }
+            }
+        })
+  }
+
+  function deleting_field(obj) {
+    // console.log(obj.getAttribute('data-url'))
+    var url = obj.getAttribute('data-url')
+    var b_id = obj.getAttribute('book-id')
+
+    $.ajax({
+            type: 'GET',
+            url: url,
+            success: function(response){
+                if (response.status == 'Success') {
+                  swal(response.message, '', 'success')
+                  var tr_id_nm = "book_row_comp" + b_id
+                  var tr_id_del = document.getElementById(tr_id_nm)
+                  tr_id_del.remove()
+                }
+            }
+        })
+  }
+
+  function editing_field(obj){
+    // console.log(obj.getAttribute('data-url'))
+    var url = obj.getAttribute('data-url')
+    var b_id = obj.getAttribute('book-id')
+    var cls_name = b_id + "book_row"
+    var tr_id = "book_row_comp"+ b_id
+    // console.log(cls_name)
+    var edit_book_class_elems = document.getElementsByClassName(cls_name)
+    // console.log(edit_book_class_elems[0].innerHTML)
+    var pre_book_name = edit_book_class_elems[0].innerHTML
+    var pre_author_name = edit_book_class_elems[1].innerHTML
+    var pre_published_year = edit_book_class_elems[2].innerHTML
+
+    edit_book_class_elems[0].innerHTML = "<input type='text' name='' value='" + pre_book_name + "'>"
+    edit_book_class_elems[1].innerHTML = "<input type='text' name='' value='" + pre_author_name + "'>"
+    edit_book_class_elems[2].innerHTML = "<input type='text' name='' value='" + pre_published_year + "'>"
+    edit_book_class_elems[3].innerHTML = "<a href='#' onclick = 'save_edit_field(this)' data-url="+ url + " " +"book-id="+ b_id +">Save</a>"
+  }
+
+  function save_edit_field(obj){
+    var url = obj.getAttribute('data-url')
+    var b_id = obj.getAttribute('book-id')
+    var cls_name = b_id + "book_row"
+    var edit_book_class_elems = document.getElementsByClassName(cls_name)
+    var edit_book_name = edit_book_class_elems[0].getElementsByTagName('input')[0].value
+    var edit_author_name = edit_book_class_elems[1].getElementsByTagName('input')[0].value
+    var edit_published_year = edit_book_class_elems[2].getElementsByTagName('input')[0].value
+
+    $.ajax({
+            type: 'GET',
+            url: url,
+            data: {
+              "book_name": edit_book_name,
+              "author_name": edit_author_name,
+              "published_year": edit_published_year,
+            },
+            success: function(response){
+                if (response.status=='Success'){
+                  // console.log(response.message)
+                  swal(response.message, '', 'success')
+                  edit_book_class_elems[0].innerHTML = edit_book_name
+                  edit_book_class_elems[1].innerHTML = edit_author_name
+                  edit_book_class_elems[2].innerHTML = edit_published_year
+                  edit_book_class_elems[3].innerHTML = "<a href='#' onclick = 'editing_field(this)' data-url="+ url + " " +"book-id="+ b_id +">Edit</a>&nbsp/&nbsp<a href='#' onclick = 'deleting_field(this)' data-url="+ url + " " +"book-id="+ b_id +">Delete</a>"
+                }
+            }
+        })
+  }
+
+</script>
+
+{% endblock %}
+
+
+<!-- "<a href='#' onclick = 'editing_field(this)' data-url='{% url "edit_book_view"           +"book-id="+ b_id +">Edit</a>&nbsp/&nbsp<a href='#'>Delete</a>"
+
+<a href="#" onclick = editing_field(this) data-url = "{% url 'edit_book_view' book.id %}" book-id = {{book.id}} >Edit</a>&nbsp/&nbsp<a href="#">Delete</a> -->
